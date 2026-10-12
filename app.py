@@ -5,21 +5,47 @@ from supabase import create_client, Client
 
 TARIFA_ESTIMADA = 1.10
 
-st.set_page_config(page_title="Mi Control de Entrega", page_icon="📦", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Mi Control de Entrega", page_icon="📦", layout="wide", initial_sidebar_state="collapsed")
 st.markdown("""
 <style>
-.stApp {background:linear-gradient(135deg,#0f172a 0%,#172554 48%,#312e81 100%);color:#f8fafc}
-[data-testid="stSidebar"] {background:linear-gradient(180deg,#111827 0%,#1e1b4b 100%)}
-[data-testid="stMetric"] {background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);padding:16px;border-radius:16px}
-[data-testid="stMetricValue"], [data-testid="stMetricValue"] > div {color:#FFD84D !important}
-.hero {padding:1.4rem 1.6rem;border-radius:22px;background:linear-gradient(110deg,rgba(14,165,233,.22),rgba(139,92,246,.28));border:1px solid rgba(255,255,255,.16);margin-bottom:1rem}
-.hero h1 {margin-bottom:.25rem}.muted {color:#cbd5e1}
-div.stButton > button {border-radius:12px;min-height:2.7rem;font-weight:650}
-@keyframes floatBox {0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-.delivery-icon {display:inline-block;animation:floatBox 2.4s ease-in-out infinite}
+:root { --brand:#2563eb; --brand-dark:#1d4ed8; --ink:#172033; --muted:#64748b; --surface:#ffffff; --line:#e2e8f0; }
+.stApp {background:#f4f7fb;color:var(--ink)}
+[data-testid="stHeader"] {background:rgba(244,247,251,.92)}
+[data-testid="stMainBlockContainer"] {max-width:1180px;padding-top:1.5rem;padding-bottom:3rem}
+[data-testid="stSidebar"] {background:#fff;border-right:1px solid var(--line)}
+[data-testid="stSidebar"] * {color:var(--ink)}
+[data-testid="stSidebar"] [data-testid="stButton"] button {border-radius:12px}
+.hero {padding:clamp(1.1rem,3vw,2rem);border-radius:24px;background:linear-gradient(120deg,#1d4ed8 0%,#2563eb 48%,#7c3aed 100%);color:white;box-shadow:0 14px 35px rgba(37,99,235,.18);margin-bottom:1.2rem}
+.hero h1 {color:white!important;font-size:clamp(1.65rem,4vw,2.35rem);line-height:1.15;margin-bottom:.5rem}
+.hero .muted {color:#e0eaff;font-size:1rem}
+[data-testid="stMetric"] {background:var(--surface);border:1px solid var(--line);padding:1rem 1.1rem;border-radius:18px;box-shadow:0 4px 16px rgba(15,23,42,.035);min-height:112px}
+[data-testid="stMetricLabel"] {color:var(--muted)!important;font-weight:600}
+[data-testid="stMetricValue"], [data-testid="stMetricValue"] > div {color:var(--brand-dark)!important;font-weight:750}
+[data-testid="stMetricDelta"] {font-size:.82rem}
+[data-testid="stProgressBar"] {height:12px}
+[data-testid="stProgressBar"] > div {border-radius:99px}
+[data-testid="stForm"] {background:white;border:1px solid var(--line);border-radius:18px;padding:1rem 1.1rem}
+[data-testid="stDataFrame"], [data-testid="stTable"] {border-radius:14px;overflow:hidden}
+[data-testid="stTabs"] button {font-weight:650}
+.stTextInput input, .stNumberInput input, [data-baseweb="select"] > div, [data-testid="stDateInput"] input {border-radius:12px!important}
+div.stButton > button, div.stFormSubmitButton > button, [data-testid="stDownloadButton"] button {border-radius:12px;min-height:2.8rem;font-weight:700;border:0;transition:transform .15s ease,box-shadow .15s ease}
+div.stButton > button[kind="primary"], div.stFormSubmitButton > button[kind="primary"] {background:var(--brand);color:white;box-shadow:0 5px 12px rgba(37,99,235,.18)}
+div.stButton > button:hover, div.stFormSubmitButton > button:hover {transform:translateY(-1px)}
+hr {border-color:var(--line)}
+[data-testid="stAlert"] {border-radius:14px}
+.delivery-icon {display:inline-block}
+@media (max-width: 640px) {
+  [data-testid="stMainBlockContainer"] {padding:1rem .8rem 2rem}
+  .hero {border-radius:18px;padding:1.15rem}
+  [data-testid="stMetric"] {padding:.8rem;border-radius:14px;min-height:96px}
+  [data-testid="stMetricValue"] {font-size:1.45rem}
+  [data-testid="stForm"] {padding:.8rem;border-radius:15px}
+  h1 {font-size:1.65rem!important}
+}
 </style>""", unsafe_allow_html=True)
 
 st.sidebar.markdown("## 📦 Mi Control de Entrega")
+st.sidebar.caption("Tu jornada, clara y bajo control")
 
 # Configure these values in Streamlit Cloud > App > Settings > Secrets.
 try:
@@ -157,6 +183,10 @@ except Exception as e:
     st.stop()
 
 hoy = date.today()
+try:
+    fecha_limite = date.fromisoformat(str(config["fecha_objetivo"]))
+except (ValueError, TypeError):
+    fecha_limite = hoy
 mes_actual = hoy.strftime("%Y-%m")
 registros = [{"id": r["id"], "fecha": r["fecha"], "paquetes": int(r["cantidad"]), "tarifa": float(r.get("tarifa") or (float(r["importe"]) / max(1, int(r["cantidad"])))), "importe": float(r["importe"])} for r in registros_raw]
 gastos = [{"id": g["id"], "fecha": g["fecha"], "importe": float(g["importe"])} for g in gastos_raw]
