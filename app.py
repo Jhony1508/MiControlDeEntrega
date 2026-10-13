@@ -1,11 +1,13 @@
 from datetime import date, datetime
+from pathlib import Path
 import pandas as pd
 import streamlit as st
 from supabase import create_client, Client
 
 TARIFA_ESTIMADA = 1.10
 
-st.set_page_config(page_title="Mi Control de Entrega", page_icon="📦", layout="wide", initial_sidebar_state="collapsed")
+ICONO = Path(__file__).parent / "icono.png"
+st.set_page_config(page_title="Mi Control de Entrega", page_icon=str(ICONO), layout="wide", initial_sidebar_state="collapsed")
 st.markdown("""
 <style>
 :root { --brand:#2563eb; --brand-dark:#1d4ed8; --ink:#172033; --muted:#64748b; --surface:#ffffff; --line:#e2e8f0; }
